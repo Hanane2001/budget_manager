@@ -1,74 +1,181 @@
+<?php 
+include 'config/database.php';
+
+$total_income_result = $conn->query("SELECT SUM(amountIn) as total FROM incomes");
+$total_income = $total_income_result->fetch_assoc()['total'] ?? 0;
+
+$total_expense_result = $conn->query("SELECT SUM(amountEx) as total FROM expenses");
+$total_expense = $total_expense_result->fetch_assoc()['total'] ?? 0;
+
+$balance = $total_income - $total_expense;
+
+$month_InEx = date('Y-m');
+$month_income_result = $conn->query("SELECT SUM(amountIn) as total FROM incomes WHERE DATE_FORMAT(dateIn, '%Y-%m') = '$month_InEx'");
+$month_income = $month_income_result->fetch_assoc()['total'] ?? 0;
+
+$month_expense_result = $conn->query("SELECT SUM(amountEx) as total FROM expenses WHERE DATE_FORMAT(dateEx, '%Y-%m') = '$month_InEx'");
+$month_expense = $month_expense_result->fetch_assoc()['total'] ?? 0;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Dashboard - SmartBudget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<div class="min-h-full">
-  <nav class="bg-blue-500/50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex h-16 items-center justify-between">
-        <div class="flex items-center">
-          <div class="shrink-0">
-            <img src="assets/img/logo.png" alt="logo" class="size-8" />
-          </div>
-          <div class="hidden md:block">
-            <div class="ml-10 flex items-baseline space-x-4">
-              <a href="index.php" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Home</a>
-              <a href="#" aria-current="page" class="rounded-md px-3 py-2 text-sm text-gray-300 font-medium hover:bg-white/5 hover:text-white">Dashboard</a>
-              <a href="incomes/list.php" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Incomes</a>
-              <a href="expenses/list.php" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Expenses</a>
+<body class="bg-gray-50">
+    <nav class="bg-blue-600 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-wallet text-white text-2xl"></i>
+                    <span class="text-white text-xl font-bold">SmartBudget</span>
+                </div>
+                <div id="navLinks" class="hidden md:flex space-x-6">
+                    <a href="index.php" class="text-white hover:text-blue-200">Home</a>
+                    <a href="dashboard.php" class="text-white font-bold">Dashboard</a>
+                    <a href="incomes/list.php" class="text-white hover:text-blue-200">Incomes</a>
+                    <a href="expenses/list.php" class="text-white hover:text-blue-200">Expenses</a>
+                </div>
+                <button id="menu_tougle" class="md:hidden text-white"><i class="fas fa-bars text-2xl"></i></button>
             </div>
-          </div>
         </div>
-        <div class="hidden md:block">
-          <div class="ml-4 flex items-center md:ml-6">
-            <button type="button" class="relative rounded-full p-1 text-gray-400 hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
-              <span class="absolute -inset-1.5"></span>
-              <span class="sr-only">View notifications</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
-                <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="-mr-2 flex md:hidden">
-          <button id="menu_btn" type="button" command="--toggle" commandfor="mobile_menu" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
-            <span class="absolute -inset-0.5"></span>
-            <span class="sr-only">Open main menu</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 in-aria-expanded:hidden">
-              <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 not-in-aria-expanded:hidden">
-              <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div id="mobile_menu" hidden class="block md:hidden">
-      <div class="space-y-1 px-2 pt-2 pb-3 sm:px-3">
-        <a href="index.php" aria-current="page" class="block rounded-md bg-gray-950/50 px-3 py-2 text-base font-medium text-white">Home</a>
-        <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
-        <a href="incomes/list.php" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Incomes</a>
-        <a href="expenses/list.php" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Expenses</a>
-      </div>
-    </div>
-  </nav>
+    </nav>
 
-  <header class="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:inset-y-0 after:border-y after:border-white/10">
-    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 class="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Financial Dashboard</h1>
+
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Incomes</p>
+                        <h3 class="text-2xl font-bold text-gray-800">$<?php echo number_format($total_income, 2); ?></h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-red-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Expenses</p>
+                        <h3 class="text-2xl font-bold text-gray-800">$<?php echo number_format($total_expense, 2); ?></h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Current Balance</p>
+                        <h3 class="text-2xl font-bold <?php echo $balance >= 0 ? 'text-green-600' : 'text-red-600'; ?>">$<?php echo number_format($balance, 2); ?></h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">This Month</p>
+                        <h3 class="text-xl font-bold text-gray-800">+$<?php echo number_format($month_income, 2); ?> / -$<?php echo number_format($month_expense, 2); ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow p-8 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold">Add New Income</h3>
+                </div>
+                <p class="mb-6">Record your latest income source quickly.</p>
+                <a href="incomes/list.php" class="inline-block bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">Go to Incomes</a>
+            </div>
+
+            <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow p-8 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold">Add New Expense</h3>
+                </div>
+                <p class="mb-6">Track your spending and manage expenses.</p>
+                <a href="expenses/list.php" class="inline-block bg-white text-red-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">Go to Expenses</a>
+            </div>
+        </div>
+        <!-- chartjs -->
+        <div class="w-full md:w-[70%] lg:w-[50%] mx-auto flex flex-col items-center">
+            <h2 class="text-3xl font-bold text-gray-800">Budget Summary</h2>
+            <canvas class="mt-5 mb-5 w-full" id="chartjs_bar"></canvas>
+        </div>
+   
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Recent Transactions</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3">Date</th>
+                            <th class="px-4 py-3">Description</th>
+                            <th class="px-4 py-3">Type</th>
+                            <th class="px-4 py-3">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                          $recent_incomes = $conn->query("SELECT *, 'Income' as type FROM incomes ORDER BY dateIn DESC LIMIT 3");
+                          while($row = $recent_incomes->fetch_assoc()): ?>
+                          <tr class="border-b">
+                              <td class="px-4 py-3"><?php echo $row['dateIn']; ?></td>
+                              <td class="px-4 py-3"><?php echo $row['descriptionIn']; ?></td>
+                              <td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Income</span></td>
+                              <td class="px-4 py-3 text-green-600 font-semibold">+$<?php echo number_format($row['amountIn'], 2); ?></td>
+                          </tr>
+                        <?php endwhile; ?>
+                        
+                        <?php
+                          $recent_expenses = $conn->query("SELECT *, 'Expense' as type FROM expenses ORDER BY dateEx DESC LIMIT 3");
+                          while($row = $recent_expenses->fetch_assoc()): ?>
+                          <tr class="border-b">
+                              <td class="px-4 py-3"><?php echo $row['dateEx']; ?></td>
+                              <td class="px-4 py-3"><?php echo $row['descriptionEx']; ?></td>
+                              <td class="px-4 py-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Expense</span></td>
+                              <td class="px-4 py-3 text-red-600 font-semibold">-$<?php echo number_format($row['amountEx'], 2); ?></td>
+                          </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </header>
-  <main>
-    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-    </div>
-  </main>
-</div>
-<script src="assets/js/main.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script type="text/javascript">
+      var ctx = document.getElementById("chartjs_bar").getContext('2d');
+      var gradientGreen = ctx.createLinearGradient(0, 0, 0, 400);
+      gradientGreen.addColorStop(0, "#22c55e"); 
+      gradientGreen.addColorStop(1, "#16a34a"); 
+
+      var gradientRed = ctx.createLinearGradient(0, 0, 0, 400);
+      gradientRed.addColorStop(0, "#ef4444");
+      gradientRed.addColorStop(1, "#b91c1c");
+
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Total Income", "Total Expense"],
+                        datasets: [{
+                            data: [<?php echo $total_income; ?>, <?php echo $total_expense; ?>],
+                            backgroundColor: [gradientGreen,gradientRed]
+                        }]
+                    },
+                    options: {
+                      legend: {
+                          display: false
+                      }
+                  }
+                });
+    </script>
 </body>
 </html>
+<?php closeConnection($conn); ?>

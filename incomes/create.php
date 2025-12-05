@@ -1,32 +1,33 @@
 <?php
-session_start();
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "smart_wallet";
+include '../config/database.php';
 
-$income = trim($_POST['income'] ?? '');
-$dateIn = trim($_POST["dateIn"] ?? '');
-$descriptionIn = trim($_POST["descriptionIn"] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $amount = $_POST['amountIn'] ?? '';
+    $date = $_POST['dateIn'] ?? '';
+    $description = $_POST['descriptionIn'] ?? '';
 
-if($income !== '' && $dateIn !== '' && $descriptionIn !== ''){
-    $conn = new mysqli($servername, $username, $password, $dbname);
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
+    if (!empty($amount) && !empty($date)) {
+        $amount = floatval($amount);
+        $date = $conn->real_escape_string($date);
+        $description = $conn->real_escape_string($description);
+        $sql = "INSERT INTO incomes (amountIn, dateIn, descriptionIn) VALUES (?, ?, ?)";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("dss", $amount, $date, $description);
+        
+        if ($stmt->execute()) {
+            header("Location: list.php?message=income_added");
+        } else {
+            header("Location: list.php?error=insert_failed");
         }
-
-        $stmt = $conn->prepare("INSERT INTO incomes (amountIn,dateIn,descriptionIn) VALUES (?,?,?)");
-        if (!$stmt) {
-            die("Prepare failed: " . $conn->error);
-        }
-
-        $stmt->bind_param("dss", $income,$dateIn,$descriptionIn);
-        $stmt->execute();
-
         $stmt->close();
-        $conn->close();
+    } else {
+        header("Location: list.php?error=missing_fields");
+    }
+} else {
+    header("Location: list.php");
 }
 
-header("Location: list.php");
-exit;
+$conn->close();
+exit();
 ?>
