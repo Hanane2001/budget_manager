@@ -148,6 +148,34 @@ $month_expense = $month_expense_result->fetch_assoc()['total'] ?? 0;
         </div>
     </div>
     <script src="assets/js/main.js"></script>
+    <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script type="text/javascript">
+      var ctx = document.getElementById("chartjs_bar").getContext('2d');
+      var gradientGreen = ctx.createLinearGradient(0, 0, 0, 400);
+      gradientGreen.addColorStop(0, "#22c55e"); 
+      gradientGreen.addColorStop(1, "#16a34a"); 
+
+      var gradientRed = ctx.createLinearGradient(0, 0, 0, 400);
+      gradientRed.addColorStop(0, "#ef4444");
+      gradientRed.addColorStop(1, "#b91c1c");
+
+                var myChart = new Chart(ctx, {
+                    type: 'budget',
+                    data: {
+                        labels: ["Total Income", "Total Expense"],
+                        datasets: [{
+                            data: [<?php echo $total_income; ?>, <?php echo $total_expense; ?>],
+                            backgroundColor: [gradientGreen,gradientRed]
+                        }]
+                    },
+                    options: {
+                      legend: {
+                          display: false
+                      }
+                  }
+                });
+    </script>
 </body>
 </html>
 <?php closeConnection($conn); ?>
