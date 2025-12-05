@@ -161,7 +161,7 @@ $month_expense = $month_expense_result->fetch_assoc()['total'] ?? 0;
       gradientRed.addColorStop(1, "#b91c1c");
 
                 var myChart = new Chart(ctx, {
-                    type: 'bar',
+                    type: 'budget',
                     data: {
                         labels: ["Total Income", "Total Expense"],
                         datasets: [{
