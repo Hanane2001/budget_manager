@@ -1,6 +1,11 @@
 <?php 
 session_start();
 include 'config/database.php'; 
+
+if (isset($_SESSION['user_id'])) {
+    header("Location: dashboard.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,6 +30,9 @@ include 'config/database.php';
                         <a href="dashboard.php" class="text-white hover:text-blue-200">Dashboard</a>
                         <a href="incomes/list.php" class="text-white hover:text-blue-200">Incomes</a>
                         <a href="expenses/list.php" class="text-white hover:text-blue-200">Expenses</a>
+                        <a href="cards/list.php" class="text-white hover:text-blue-200">Cards</a>
+                        <a href="transfers/list.php" class="text-white hover:text-blue-200">Transfers</a>
+                        <a href="limits/list.php" class="text-white hover:text-blue-200">Limits</a>
                         <a href="auth/logout.php" class="text-white hover:text-blue-200">Logout</a>
                     <?php else: ?>
                         <a href="auth/login.php" class="text-white hover:text-blue-200">Login</a>
@@ -36,11 +44,11 @@ include 'config/database.php';
         </div>
     </nav>
 
-    <section class="py-20 bg-gradient-to-r from-blue-500 to-purple-600 h-screen">
+    <section class="py-20 bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen">
         <div class="container mx-auto px-4 text-center">
             <h1 class="text-5xl font-bold text-white mb-6">Take Control of Your Finances</h1>
             <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-                Track your income, manage expenses, and achieve your financial goals with SmartBudget.
+                Track your income, manage expenses, set limits, and achieve your financial goals with SmartBudget.
                 Simple, intuitive, and completely free.
             </p>
             <div class="flex justify-center space-x-4">
