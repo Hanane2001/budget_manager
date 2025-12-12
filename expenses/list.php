@@ -34,7 +34,7 @@ $result = $conn->query("
                     <i class="fas fa-wallet text-white text-2xl"></i>
                     <span class="text-white text-xl font-bold">SmartBudget</span>
                 </div>
-                <div class="hidden md:flex space-x-6">
+                <div id="navLinks" class="hidden md:flex space-x-6">
                     <a href="../index.php" class="text-white hover:text-blue-200">Home</a>
                     <a href="../dashboard.php" class="text-white hover:text-blue-200">Dashboard</a>
                     <a href="../incomes/list.php" class="text-white hover:text-blue-200">Incomes</a>
@@ -44,6 +44,7 @@ $result = $conn->query("
                     <a href="../limits/list.php" class="text-white hover:text-blue-200">Limits</a>
                     <a href="../auth/logout.php" class="text-white hover:text-blue-200">Logout</a>
                 </div>
+                <button id="menu_tougle" class="md:hidden text-white"><i class="fas fa-bars text-2xl"></i></button>
             </div>
         </div>
     </nav>

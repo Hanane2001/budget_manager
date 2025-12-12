@@ -2,10 +2,10 @@
 session_start();
 include 'config/database.php'; 
 
-if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
-    exit();
-}
+// if (isset($_SESSION['user_id'])) {
+//     header("Location: dashboard.php");
+//     exit();
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">

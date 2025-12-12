@@ -2,8 +2,13 @@
 CREATE DATABASE IF NOT EXISTS smart_wallet;
 USE smart_wallet;
 
-DROP TABLE incomes;
-DROP TABLE expenses;
+-- Drop tables
+DROP TABLE IF EXISTS transfers;
+DROP TABLE IF EXISTS expenses;
+DROP TABLE IF EXISTS incomes;
+DROP TABLE IF EXISTS monthly_limits;
+DROP TABLE IF EXISTS cards;
+DROP TABLE IF EXISTS users;
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
@@ -85,9 +90,3 @@ CREATE TABLE IF NOT EXISTS transfers (
     FOREIGN KEY (sender_card_id) REFERENCES cards(idCard) ON DELETE CASCADE,
     FOREIGN KEY (receiver_card_id) REFERENCES cards(idCard) ON DELETE CASCADE
 );
-
-INSERT INTO users (fullName, email, password) VALUES 
-('hanane', 'hanan2122hanan@gmail.com', 'admin123');
-
-INSERT INTO cards (idUser, cardName, bankName, cardNumber, isMain, currentBalance) VALUES 
-(1, 'Carte Principale', 'Banque Populaire', '**** **** **** 1234', TRUE, 5000.00);
