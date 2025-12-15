@@ -1,12 +1,4 @@
-<?php 
-session_start();
-include 'config/database.php'; 
-
-// if (isset($_SESSION['user_id'])) {
-//     header("Location: dashboard.php");
-//     exit();
-// }
-?>
+<?php include 'config/database.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,39 +18,25 @@ include 'config/database.php';
                 </div>
                 <div id="navLinks" class="hidden md:flex space-x-6">
                     <a href="index.php" class="text-white hover:text-blue-200">Home</a>
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="dashboard.php" class="text-white hover:text-blue-200">Dashboard</a>
-                        <a href="incomes/list.php" class="text-white hover:text-blue-200">Incomes</a>
-                        <a href="expenses/list.php" class="text-white hover:text-blue-200">Expenses</a>
-                        <a href="cards/list.php" class="text-white hover:text-blue-200">Cards</a>
-                        <a href="transfers/list.php" class="text-white hover:text-blue-200">Transfers</a>
-                        <a href="limits/list.php" class="text-white hover:text-blue-200">Limits</a>
-                        <a href="auth/logout.php" class="text-white hover:text-blue-200">Logout</a>
-                    <?php else: ?>
-                        <a href="auth/login.php" class="text-white hover:text-blue-200">Login</a>
-                        <a href="auth/register.php" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition">Register</a>
-                    <?php endif; ?>
+                    <a href="dashboard.php" class="text-white hover:text-blue-200">Dashboard</a>
+                    <a href="incomes/list.php" class="text-white hover:text-blue-200">Incomes</a>
+                    <a href="expenses/list.php" class="text-white hover:text-blue-200">Expenses</a>
                 </div>
                 <button id="menu_tougle" class="md:hidden text-white"><i class="fas fa-bars text-2xl"></i></button>
             </div>
         </div>
     </nav>
 
-    <section class="py-20 bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen">
+    <section class="py-20 bg-gradient-to-r from-blue-500 to-purple-600 h-screen">
         <div class="container mx-auto px-4 text-center">
             <h1 class="text-5xl font-bold text-white mb-6">Take Control of Your Finances</h1>
             <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-                Track your income, manage expenses, set limits, and achieve your financial goals with SmartBudget.
+                Track your income, manage expenses, and achieve your financial goals with SmartBudget.
                 Simple, intuitive, and completely free.
             </p>
             <div class="flex justify-center space-x-4">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="dashboard.php" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">View Dashboard</a>
-                    <a href="incomes/list.php" class="bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-900 transition">Add Income</a>
-                <?php else: ?>
-                    <a href="auth/login.php" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">Login</a>
-                    <a href="auth/register.php" class="bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-900 transition">Get Started</a>
-                <?php endif; ?>
+                <a href="dashboard.php" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">View Dashboard</a>
+                <a href="incomes/list.php" class="bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-900 transition">Add Income</a>
             </div>
         </div>
     </section>

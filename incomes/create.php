@@ -1,42 +1,29 @@
 <?php
-session_start();
 include '../config/database.php';
-$userId = checkAuth();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $amount = floatval($_POST['amountIn'] ?? 0);
+    $amount = $_POST['amountIn'] ?? '';
     $date = $_POST['dateIn'] ?? '';
-    $description = trim($_POST['descriptionIn'] ?? '');
-    $idCard = intval($_POST['idCard'] ?? 0);
-    $isRecurring = isset($_POST['isRecurring']) ? 1 : 0;
+    $description = $_POST['descriptionIn'] ?? '';
 
-    if ($amount <= 0 || empty($date) || $idCard <= 0) {
-        header("Location: list.php?error=missing_fields");
-        exit();
-    }
-
-    $checkCard = $conn->prepare("SELECT idCard FROM cards WHERE idCard = ? AND idUser = ?");
-    $checkCard->bind_param("ii", $idCard, $userId);
-    $checkCard->execute();
-    $cardResult = $checkCard->get_result();
-    
-    if ($cardResult->num_rows === 0) {
-        header("Location: list.php?error=invalid_card");
-        exit();
-    }
-    $checkCard->close();
-
-    $stmt = $conn->prepare("INSERT INTO incomes (idUser, idCard, amountIn, dateIn, descriptionIn, isRecurring) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("iidssi", $userId, $idCard, $amount, $date, $description, $isRecurring);
-    
-    if ($stmt->execute()) {
-        $conn->query("UPDATE cards SET currentBalance = currentBalance + $amount WHERE idCard = $idCard");
+    if (!empty($amount) && !empty($date)) {
+        $amount = floatval($amount);
+        $date = $conn->real_escape_string($date);
+        $description = $conn->real_escape_string($description);
+        $sql = "INSERT INTO incomes (amountIn, dateIn, descriptionIn) VALUES (?, ?, ?)";
         
-        header("Location: list.php?message=income_added");
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("dss", $amount, $date, $description);
+        
+        if ($stmt->execute()) {
+            header("Location: list.php?message=income_added");
+        } else {
+            header("Location: list.php?error=insert_failed");
+        }
+        $stmt->close();
     } else {
-        header("Location: list.php?error=insert_failed");
+        header("Location: list.php?error=missing_fields");
     }
-    $stmt->close();
 } else {
     header("Location: list.php");
 }

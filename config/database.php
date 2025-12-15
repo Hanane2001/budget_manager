@@ -15,16 +15,4 @@ $conn->set_charset("utf8");
 function closeConnection($conn) {
     $conn->close();
 }
-
-function checkAuth() {
-    if (!isset($_SESSION['user_id'])) {
-        header("Location: ../auth/login.php");
-        exit();
-    }
-    return $_SESSION['user_id'];
-}
-
-function getUserId() {
-    return isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-}
 ?>

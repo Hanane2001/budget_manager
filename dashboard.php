@@ -1,39 +1,20 @@
 <?php 
-session_start();
 include 'config/database.php';
-checkAuth();
 
-$userId = $_SESSION['user_id'];
-
-$total_income_result = $conn->query("SELECT SUM(amountIn) as total FROM incomes WHERE idUser = $userId");
+$total_income_result = $conn->query("SELECT SUM(amountIn) as total FROM incomes");
 $total_income = $total_income_result->fetch_assoc()['total'] ?? 0;
 
-$total_expense_result = $conn->query("SELECT SUM(amountEx) as total FROM expenses WHERE idUser = $userId");
+$total_expense_result = $conn->query("SELECT SUM(amountEx) as total FROM expenses");
 $total_expense = $total_expense_result->fetch_assoc()['total'] ?? 0;
 
 $balance = $total_income - $total_expense;
 
 $month_InEx = date('Y-m');
-$month_income_result = $conn->query("SELECT SUM(amountIn) as total FROM incomes WHERE idUser = $userId AND DATE_FORMAT(dateIn, '%Y-%m') = '$month_InEx'");
+$month_income_result = $conn->query("SELECT SUM(amountIn) as total FROM incomes WHERE DATE_FORMAT(dateIn, '%Y-%m') = '$month_InEx'");
 $month_income = $month_income_result->fetch_assoc()['total'] ?? 0;
 
-$month_expense_result = $conn->query("SELECT SUM(amountEx) as total FROM expenses WHERE idUser = $userId AND DATE_FORMAT(dateEx, '%Y-%m') = '$month_InEx'");
+$month_expense_result = $conn->query("SELECT SUM(amountEx) as total FROM expenses WHERE DATE_FORMAT(dateEx, '%Y-%m') = '$month_InEx'");
 $month_expense = $month_expense_result->fetch_assoc()['total'] ?? 0;
-
-$main_card_result = $conn->query("SELECT * FROM cards WHERE idUser = $userId AND isMain = 1 LIMIT 1");
-$main_card = $main_card_result->fetch_assoc();
-
-$limits_result = $conn->query("SELECT * FROM monthly_limits WHERE idUser = $userId");
-$limits = [];
-while($row = $limits_result->fetch_assoc()) {
-    $limits[$row['category']] = $row['monthlyLimit'];
-}
-
-$category_expenses = [];
-$cat_expenses_result = $conn->query("SELECT category, SUM(amountEx) as total FROM expenses WHERE idUser = $userId AND DATE_FORMAT(dateEx, '%Y-%m') = '$month_InEx' GROUP BY category");
-while($row = $cat_expenses_result->fetch_assoc()) {
-    $category_expenses[$row['category']] = $row['total'];
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -57,10 +38,6 @@ while($row = $cat_expenses_result->fetch_assoc()) {
                     <a href="dashboard.php" class="text-white font-bold">Dashboard</a>
                     <a href="incomes/list.php" class="text-white hover:text-blue-200">Incomes</a>
                     <a href="expenses/list.php" class="text-white hover:text-blue-200">Expenses</a>
-                    <a href="cards/list.php" class="text-white hover:text-blue-200">Cards</a>
-                    <a href="transfers/list.php" class="text-white hover:text-blue-200">Transfers</a>
-                    <a href="limits/list.php" class="text-white hover:text-blue-200">Limits</a>
-                    <a href="auth/logout.php" class="text-white hover:text-blue-200">Logout</a>
                 </div>
                 <button id="menu_tougle" class="md:hidden text-white"><i class="fas fa-bars text-2xl"></i></button>
             </div>
@@ -69,7 +46,6 @@ while($row = $cat_expenses_result->fetch_assoc()) {
 
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">Financial Dashboard</h1>
-        <p class="text-gray-600 mb-8">Overview of your financial situation</p>
 
         <div class="grid md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
@@ -109,59 +85,29 @@ while($row = $cat_expenses_result->fetch_assoc()) {
             </div>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-6 mb-8">
-            <?php if ($main_card): ?>
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow p-6 text-white">
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow p-8 text-white">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold">Main Card</h3>
+                    <h3 class="text-xl font-bold">Add New Income</h3>
                 </div>
-                <p class="text-xl font-bold mb-2">$<?php echo number_format($main_card['currentBalance'], 2); ?></p>
-                <p class="text-blue-100"><?php echo $main_card['bankName']; ?> - <?php echo $main_card['cardName']; ?></p>
-            </div>
-            <?php endif; ?>
-
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow p-6 text-white">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold">Add Income</h3>
-                </div>
-                <p class="mb-4">Record your latest income source quickly.</p>
-                <a href="incomes/list.php" class="inline-block bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-green-50 transition">Go to Incomes</a>
+                <p class="mb-6">Record your latest income source quickly.</p>
+                <a href="incomes/list.php" class="inline-block bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">Go to Incomes</a>
             </div>
 
-            <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow p-6 text-white">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow p-8 text-white">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold">Add Expense</h3>
+                    <h3 class="text-xl font-bold">Add New Expense</h3>
                 </div>
-                <p class="mb-4">Track your spending and manage expenses.</p>
-                <a href="expenses/list.php" class="inline-block bg-white text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-50 transition">Go to Expenses</a>
+                <p class="mb-6">Track your spending and manage expenses.</p>
+                <a href="expenses/list.php" class="inline-block bg-white text-red-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">Go to Expenses</a>
             </div>
         </div>
-
-        <?php if (!empty($limits)): ?>
-        <div class="bg-white rounded-xl shadow p-6 mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Monthly Limits Status</h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <?php foreach($limits as $category => $limit): 
-                    $spent = $category_expenses[$category] ?? 0;
-                    $percentage = $limit > 0 ? min(100, ($spent / $limit) * 100) : 0;
-                    $color = $percentage >= 100 ? 'bg-red-500' : ($percentage >= 80 ? 'bg-yellow-500' : 'bg-green-500');
-                ?>
-                <div class="border rounded-lg p-4">
-                    <div class="flex justify-between mb-2">
-                        <span class="font-semibold"><?php echo htmlspecialchars($category); ?></span>
-                        <span class="<?php echo $percentage >= 100 ? 'text-red-600' : 'text-gray-600'; ?>">
-                            $<?php echo number_format($spent, 2); ?> / $<?php echo number_format($limit, 2); ?>
-                        </span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="h-2.5 rounded-full <?php echo $color; ?>" style="width: <?php echo $percentage; ?>%"></div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
+        <!-- chartjs -->
+        <div class="w-full md:w-[70%] lg:w-[50%] mx-auto flex flex-col items-center">
+            <h2 class="text-3xl font-bold text-gray-800">Budget Summary</h2>
+            <canvas class="mt-5 mb-5 w-full" id="chartjs_bar"></canvas>
         </div>
-        <?php endif; ?>
-
+   
         <div class="bg-white rounded-xl shadow p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Recent Transactions</h2>
             <div class="overflow-x-auto">
@@ -176,45 +122,60 @@ while($row = $cat_expenses_result->fetch_assoc()) {
                     </thead>
                     <tbody>
                         <?php
-                        $recent_transactions = $conn->query("
-                            (SELECT idIn as id, dateIn as date, descriptionIn as description, amountIn as amount, 'Income' as type 
-                             FROM incomes WHERE idUser = $userId 
-                             ORDER BY dateIn DESC LIMIT 3)
-                            UNION ALL
-                            (SELECT idEx as id, dateEx as date, descriptionEx as description, amountEx as amount, 'Expense' as type 
-                             FROM expenses WHERE idUser = $userId 
-                             ORDER BY dateEx DESC LIMIT 3)
-                            ORDER BY date DESC LIMIT 6
-                        ");
-                        
-                        while($row = $recent_transactions->fetch_assoc()): ?>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3"><?php echo $row['date']; ?></td>
-                                <td class="px-4 py-3"><?php echo htmlspecialchars($row['description']); ?></td>
-                                <td class="px-4 py-3">
-                                    <?php if($row['type'] == 'Income'): ?>
-                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Income</span>
-                                    <?php else: ?>
-                                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Expense</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="px-4 py-3 font-semibold <?php echo $row['type'] == 'Income' ? 'text-green-600' : 'text-red-600'; ?>">
-                                    <?php echo $row['type'] == 'Income' ? '+' : '-'; ?>$<?php echo number_format($row['amount'], 2); ?>
-                                </td>
-                            </tr>
+                          $recent_incomes = $conn->query("SELECT *, 'Income' as type FROM incomes ORDER BY dateIn DESC LIMIT 3");
+                          while($row = $recent_incomes->fetch_assoc()): ?>
+                          <tr class="border-b">
+                              <td class="px-4 py-3"><?php echo $row['dateIn']; ?></td>
+                              <td class="px-4 py-3"><?php echo $row['descriptionIn']; ?></td>
+                              <td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Income</span></td>
+                              <td class="px-4 py-3 text-green-600 font-semibold">+$<?php echo number_format($row['amountIn'], 2); ?></td>
+                          </tr>
                         <?php endwhile; ?>
                         
-                        <?php if($recent_transactions->num_rows == 0): ?>
-                            <tr>
-                                <td colspan="4" class="px-4 py-8 text-center text-gray-500">No transactions yet.</td>
-                            </tr>
-                        <?php endif; ?>
+                        <?php
+                          $recent_expenses = $conn->query("SELECT *, 'Expense' as type FROM expenses ORDER BY dateEx DESC LIMIT 3");
+                          while($row = $recent_expenses->fetch_assoc()): ?>
+                          <tr class="border-b">
+                              <td class="px-4 py-3"><?php echo $row['dateEx']; ?></td>
+                              <td class="px-4 py-3"><?php echo $row['descriptionEx']; ?></td>
+                              <td class="px-4 py-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Expense</span></td>
+                              <td class="px-4 py-3 text-red-600 font-semibold">-$<?php echo number_format($row['amountEx'], 2); ?></td>
+                          </tr>
+                        <?php endwhile; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
     <script src="assets/js/main.js"></script>
+    <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script type="text/javascript">
+      var ctx = document.getElementById("chartjs_bar").getContext('2d');
+      var gradientGreen = ctx.createLinearGradient(0, 0, 0, 400);
+      gradientGreen.addColorStop(0, "#22c55e"); 
+      gradientGreen.addColorStop(1, "#16a34a"); 
+
+      var gradientRed = ctx.createLinearGradient(0, 0, 0, 400);
+      gradientRed.addColorStop(0, "#ef4444");
+      gradientRed.addColorStop(1, "#b91c1c");
+
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Total Income", "Total Expense"],
+                        datasets: [{
+                            data: [<?php echo $total_income; ?>, <?php echo $total_expense; ?>],
+                            backgroundColor: [gradientGreen,gradientRed]
+                        }]
+                    },
+                    options: {
+                      legend: {
+                          display: false
+                      }
+                  }
+                });
+    </script>
 </body>
 </html>
 <?php closeConnection($conn); ?>
